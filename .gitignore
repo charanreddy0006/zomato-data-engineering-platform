@@ -1,0 +1,35 @@
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
+
+# Credentials
+creds/
+*.pem
+*.key
+
+# dbt
+zomato/target/
+zomato/logs/
+zomato/dbt_packages/
+zomato/profiles.yml
+dbt_packages/
+
+# Logs
+logs/
+airflow/logs/
+
+# IDE
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Raw datasets
+data/
