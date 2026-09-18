@@ -1,74 +1,103 @@
-# Zomato Data Engineering Platform
+# 🍽️ Zomato Data Engineering & AI Analytics Platform
 
-An end-to-end data engineering project for building a Zomato analytics platform using AWS S3, Snowflake, Apache Airflow, dbt, Python, Docker, and SQL.
+An end-to-end **Data Engineering + AI Analytics** platform built around Zomato datasets.
 
-The project demonstrates a modern cloud-based data pipeline in which raw Zomato datasets are stored in Amazon S3, loaded into Snowflake, transformed using dbt, tested for data quality, and orchestrated using Apache Airflow.
-
-## 1. Project Overview
-
-The main objective of this project is to build a complete data engineering workflow from raw datasets to analytics-ready data.
-
-The pipeline follows this overall flow:
-
-Zomato CSV Datasets
-        |
-        v
-Amazon S3
-        |
-        v
-Snowflake RAW Layer
-        |
-        v
-dbt STAGING Layer
-        |
-        v
-dbt MARTS Layer
-        |
-        v
-Analytics / BI
-
-Apache Airflow is used to orchestrate the pipeline and automate the execution of the Snowflake loading and dbt transformation tasks.
-
-The project is also designed to be extended with AI-powered analytics such as review enrichment, RAG, Text-to-SQL, and a Streamlit dashboard.
+This project demonstrates a modern cloud data pipeline from **Amazon S3 → Snowflake → dbt → Apache Airflow**, enhanced with **Groq LLMs, BGE-M3 embeddings, RAG, Text-to-SQL, and Streamlit**.
 
 ---
 
-## 2. Technologies Used
+##  Project Overview
 
-### Python
-Used for data processing, automation, and future AI-related components.
+```text
+                    ZOMATO DATASETS
+                          |
+                          v
+                  +---------------+
+                  |   Amazon S3   |
+                  |  Raw Storage  |
+                  +-------+-------+
+                          |
+                          v
+                  +---------------+
+                  |   Snowflake   |
+                  |   RAW Layer   |
+                  +-------+-------+
+                          |
+                          v
+                  +---------------+
+                  |      dbt      |
+                  | STAGING/MARTS |
+                  +-------+-------+
+                          |
+             +------------+------------+
+             |                         |
+             v                         v
+      +-------------+          +-------------+
+      | AI Enrichment|          |    RAG      |
+      |    Groq      |          |  BGE-M3    |
+      +------+------+          +------+------+
+             |                         |
+             +------------+------------+
+                          |
+                          v
+                  +---------------+
+                  | Text-to-SQL   |
+                  | Natural Lang. |
+                  +-------+-------+
+                          |
+                          v
+                  +---------------+
+                  |   Streamlit   |
+                  | AI Analytics  |
+                  +---------------+
 
-### Amazon S3
-Used as cloud object storage for the raw Zomato datasets.
-
-### Snowflake
-Used as the cloud data warehouse where raw, staging, and analytical data are stored.
-
-### dbt
-Used for SQL-based data transformation, data modeling, and data quality testing.
-
-### Apache Airflow
-Used to orchestrate and schedule the data pipeline.
-
-### Docker
-Used to containerize the Airflow development environment.
-
-### PostgreSQL
-Used by Airflow as its metadata database.
-
-### SQL
-Used for Snowflake data loading, transformations, modeling, and analytical queries.
-
-### Git and GitHub
-Used for source control and project version management.
+                 Apache Airflow
+              orchestrates the flow
+```
 
 ---
 
-## 3. Dataset
+##  Objectives
 
-The project works with multiple Zomato datasets.
+- Store raw Zomato datasets in Amazon S3.
+- Load raw data into Snowflake.
+- Transform data using dbt.
+- Build staging and analytical mart models.
+- Apply dbt data-quality tests.
+- Orchestrate the pipeline with Apache Airflow.
+- Run Airflow in Docker.
+- Enrich customer reviews using Groq.
+- Build a review-based RAG application.
+- Generate analytical SQL from natural-language questions.
+- Execute analytical queries safely against Snowflake.
+- Provide interactive AI analytics using Streamlit.
 
-The datasets include:
+---
+
+# 🛠️ Technologies Used
+
+| Technology | Purpose |
+|---|---|
+| 🐍 Python | Data processing and AI applications |
+| ☁️ Amazon S3 | Raw data storage |
+| ❄️ Snowflake | Cloud data warehouse |
+| 🔄 dbt | Data transformation and testing |
+| ⚙️ Apache Airflow | Pipeline orchestration |
+| 🐳 Docker | Containerized Airflow environment |
+| 🐘 PostgreSQL | Airflow metadata database |
+| 🤖 Groq | LLM inference |
+| 🧠 BGE-M3 | Review embeddings |
+| 🔎 RAG | Semantic review retrieval |
+| 💬 Text-to-SQL | Natural-language data analytics |
+| 🎨 Streamlit | Interactive AI applications |
+| 🗃️ SQL | Data loading and analytics |
+| 🔧 Git/GitHub | Version control |
+
+---
+
+#  Dataset
+
+The project uses:
 
 - Restaurants
 - Users
@@ -78,547 +107,589 @@ The datasets include:
 - Order Items
 - Reviews
 
-The raw CSV files are kept locally and are intentionally excluded from the GitHub repository because they are large and are not required for storing the source code.
-
-The data is intended to flow through the cloud pipeline:
-
-Local Dataset -> Amazon S3 -> Snowflake
+Raw CSV datasets are kept locally and/or in Amazon S3 and are intentionally excluded from Git tracking.
 
 ---
 
-## 4. AWS S3 Layer
+#  Amazon S3 Layer
 
-Amazon S3 acts as the cloud storage layer for the raw datasets.
+S3 acts as the raw cloud-storage layer.
 
-The datasets are organized into folders such as:
-
+```text
 s3://<bucket>/
-    restaurants/
-    users/
-    food/
-    menu/
-    orders/
-    order_items/
-    reviews/
+├── restaurants/
+├── users/
+├── food/
+├── menu/
+├── orders/
+├── order_items/
+└── reviews/
+```
 
-This provides a centralized location from which Snowflake can read the raw files.
+Snowflake accesses these files through an **external stage** and a secure **storage integration**.
 
 ---
 
-## 5. Snowflake Data Warehouse
+#  Snowflake Data Warehouse
 
-Snowflake is used as the main data warehouse.
+The project uses the:
 
-The project uses a database named:
-
+```text
 ZOMATO
+```
 
-The RAW schema contains the source tables loaded from Amazon S3.
+database.
 
-The main RAW tables are:
+Main schemas:
 
-ZOMATO.RAW.restaurants
-ZOMATO.RAW.users
-ZOMATO.RAW.food
-ZOMATO.RAW.menu
-ZOMATO.RAW.orders
-ZOMATO.RAW.order_items
-ZOMATO.RAW.reviews
+```text
+ZOMATO
+├── RAW
+├── STAGING
+├── MARTS
+└── AI
+```
 
-### S3 to Snowflake Integration
+## RAW Tables
 
-A Snowflake storage integration is configured to securely connect Snowflake with Amazon S3.
+```text
+ZOMATO.RAW.RESTAURANTS
+ZOMATO.RAW.USERS
+ZOMATO.RAW.FOOD
+ZOMATO.RAW.MENU
+ZOMATO.RAW.ORDERS
+ZOMATO.RAW.ORDER_ITEMS
+ZOMATO.RAW.REVIEWS
+```
 
-An external stage is used to access the files stored in S3.
+The RAW layer stores source-oriented data before transformation.
 
-The pipeline then uses Snowflake COPY INTO commands to load the raw data into the RAW tables.
+---
 
-Example flow:
+#  S3 → Snowflake
 
+```text
 Amazon S3
     |
     v
-Snowflake External Stage
+Snowflake Storage Integration
+    |
+    v
+External Stage
+    |
+    v
+COPY INTO
     |
     v
 Snowflake RAW Tables
+```
+
+The Airflow `reload_raw` task performs the Snowflake `COPY INTO` operations.
 
 ---
 
-## 6. RAW Layer
+#  dbt Transformation Layer
 
-The RAW layer stores the data in a form close to the original source.
+The dbt project is located in:
 
-Its main purpose is to provide a reliable landing layer before transformation.
-
-The RAW layer contains source-oriented tables for:
-
-- Restaurants
-- Users
-- Food
-- Menu
-- Orders
-- Order Items
-- Reviews
-
-The RAW layer is not intended to be the final analytical layer.
-
-Instead, it acts as the source for dbt staging models.
-
----
-
-## 7. dbt Transformation Layer
-
-dbt is used to transform the RAW data into clean and analytics-ready models.
-
-The dbt project is located inside:
-
+```text
 zomato/
+```
 
-The project contains:
+Architecture:
 
-- Staging models
-- Mart models
-- Tests
-- Macros
-- Seeds
-- Snapshots
-- dbt project configuration
-
-The transformation architecture is:
-
+```text
 RAW
-  |
-  v
+ |
+ v
 STAGING
-  |
-  v
+ |
+ v
 MARTS
+```
 
----
+## Staging Models
 
-## 8. STAGING Layer
-
-The staging layer cleans and standardizes the raw Snowflake tables.
-
-The staging models currently include:
-
-- stg_food
-- stg_menu
-- stg_order_items
-- stg_orders
-- stg_restaurants
-- stg_reviews
-- stg_users
-
-The staging layer provides a clean and consistent foundation for downstream analytical models.
-
-The staging models are configured as views.
-
-Example:
-
-RAW.orders
-    |
-    v
+```text
+stg_food
+stg_menu
+stg_order_items
 stg_orders
-
-RAW.reviews
-    |
-    v
+stg_restaurants
 stg_reviews
+stg_users
+```
+
+Staging models are primarily materialized as views.
+
+## Mart Models
+
+### Dimensions
+
+```text
+dim_customer
+dim_date
+dim_food
+dim_restaurants
+```
+
+### Facts
+
+```text
+fct_orders
+fact_order_items
+```
+
+### Analytical Marts
+
+```text
+mart_daily_city_revenune
+mart_delivery_sla
+mart_restaurant_performance
+```
+
+These models support revenue, restaurant, delivery, customer, order, and cancellation analysis.
 
 ---
 
-## 9. MARTS Layer
+# 🧪 Data Quality
 
-The marts layer contains analytics-ready models designed for business analysis and reporting.
+dbt tests are used for:
 
-The project contains dimension models, fact models, and analytical marts.
+- `unique`
+- `not_null`
+- `relationships`
+- `accepted_values`
+- Source/model validation
 
-### Dimension Models
-
-- dim_customer
-- dim_date
-- dim_food
-- dim_restaurants
-
-These models provide descriptive information about important business entities.
-
-### Fact Models
-
-- fct_orders
-- fact_order_items
-
-These models contain transactional data used for analytical calculations.
-
-### Analytical Models
-
-- mart_daily_city_revenune
-- mart_delivery_sla
-- mart_restaurant_performance
-
-These models provide higher-level business insights related to revenue, delivery performance, and restaurant performance.
-
-The marts layer is configured primarily with table materializations.
+The core dbt pipeline was successfully built and tested during development.
 
 ---
 
-## 10. dbt Data Quality Testing
+#  Apache Airflow
 
-dbt tests are included to validate the transformed data.
+The Airflow DAG is:
 
-The project uses tests to check important data quality rules and relationships between models.
-
-The dbt pipeline can execute:
-
-- Model builds
-- Data tests
-- Relationship checks
-- Source checks
-
-A successful core dbt build has been completed for the current project stage.
-
-The current successful build completed the core models and tests without errors.
-
----
-
-## 11. Apache Airflow
-
-Apache Airflow is used to orchestrate the data pipeline.
-
-The Airflow environment is containerized using Docker.
-
-The project contains an Airflow DAG:
-
+```text
 zomato_batch
+```
 
-The current core pipeline is:
+Main workflow:
 
+```text
 reload_raw
      |
      v
 dbt_build_core
+     |
+     v
+enrich_reviews
+     |
+     v
+dbt_build_ai
+```
 
-### reload_raw
+### `reload_raw`
 
-The `reload_raw` task executes Snowflake commands that load data from the external S3 stage into the RAW tables.
+Loads raw datasets from the Snowflake external stage into RAW tables.
 
-The task loads the following datasets:
+### `dbt_build_core`
 
-- restaurants
-- users
-- food
-- menu
-- orders
-- order_items
-- reviews
+Builds the core dbt models and runs associated tests.
 
-### dbt_build_core
+### `enrich_reviews`
 
-The `dbt_build_core` task executes the dbt build command.
+Uses Groq to classify and enrich customer reviews.
 
-It builds the core dbt models and runs the associated data quality tests.
+### `dbt_build_ai`
 
-The successful execution of these tasks demonstrates the connection between Airflow, Snowflake, and dbt.
+Builds AI-related dbt models tagged for the AI layer.
 
 ---
 
-## 12. Docker Environment
+#  Docker
 
-Docker is used to run the Airflow environment consistently.
+The Airflow environment is containerized using Docker.
 
-The project contains:
-
+```text
 airflow/
-    Dockerfile
-    docker-compose.yaml
-    dags/
-        zomato_batch.py
+├── Dockerfile
+├── docker-compose.yaml
+└── dags/
+    └── zomato_batch.py
+```
 
-The Docker-based environment includes the services required to run Airflow and its metadata database.
+The Docker image includes:
 
-This makes the project easier to reproduce on another development machine.
-
----
-
-## 13. Project Structure
-
-The repository is organized as follows:
-
-Zomato_DataPipeline/
-|
-|-- README.md
-|-- .gitignore
-|
-|-- airflow/
-|   |-- Dockerfile
-|   |-- docker-compose.yaml
-|   |-- dags/
-|       |-- zomato_batch.py
-|
-|-- data/
-|   |-- food.csv
-|   |-- menu.csv
-|   |-- order_items.csv
-|   |-- orders.csv
-|   |-- restaurant.csv
-|   |-- reviews.csv
-|   |-- users.csv
-|
-|-- zomato/
-    |-- dbt_project.yml
-    |-- README.md
-    |-- .gitignore
-    |-- models/
-    |   |-- staging/
-    |   |-- marts/
-    |-- macros/
-    |-- analyses/
-    |-- tests/
-    |-- seeds/
-    |-- snapshots/
-
-The `data/` directory exists locally but is excluded from Git tracking.
+- Apache Airflow
+- Snowflake provider
+- FAB authentication
+- Groq Python SDK
+- dbt-snowflake in a dedicated virtual environment
 
 ---
 
-## 14. Security
+#  AI Review Enrichment
 
-Sensitive credentials are not stored in the GitHub repository.
+The review enrichment application uses Groq with:
 
-The project excludes files such as:
+```text
+openai/gpt-oss-120b
+```
 
-- `.env`
-- `profiles.yml`
-- Credentials
-- Private keys
-- Generated logs
-- dbt target files
-- Python virtual environments
+Flow:
 
-Snowflake and AWS credentials should be configured locally when running the project.
+```text
+Review
+  |
+  v
+Groq LLM
+  |
+  +--> Sentiment Label
+  +--> Sentiment Score
+  +--> Topic
+  +--> Key Issue
+  |
+  v
+ZOMATO.AI.REVIEW_ENRICHED
+```
 
-Never commit passwords, API keys, access keys, or other secrets to GitHub.
+Supported topics include:
 
----
+- Food quality
+- Delivery
+- Pricing
+- Service
+- Packaging
+- Other
 
-## 15. Current Project Status
+Implementation:
 
-Completed:
-
-- [x] Prepare Zomato datasets
-- [x] Configure Amazon S3
-- [x] Upload raw datasets to S3
-- [x] Configure Snowflake
-- [x] Create Snowflake RAW tables
-- [x] Configure S3 to Snowflake integration
-- [x] Create Snowflake external stage
-- [x] Configure Apache Airflow
-- [x] Run Airflow using Docker
-- [x] Create Zomato Airflow DAG
-- [x] Load RAW data using Airflow
-- [x] Configure dbt
-- [x] Connect dbt to Snowflake
-- [x] Create staging models
-- [x] Create mart models
-- [x] Configure dbt tests
-- [x] Successfully execute the core dbt build
-
-Planned / Future Work:
-
-- [ ] AI-powered review enrichment
-- [ ] Review summarization
-- [ ] Structured review insights
-- [ ] Retrieval-Augmented Generation (RAG)
-- [ ] Vector embeddings and vector search
-- [ ] Text-to-SQL
-- [ ] SELECT-only SQL safety layer
-- [ ] Streamlit analytics dashboard
-- [ ] Complete AI workflow orchestration with Airflow
+```text
+ai/enrich_reviews.py
+```
 
 ---
 
-## 16. Planned AI Architecture
+# 🔎 Retrieval-Augmented Generation (RAG)
 
-The next stage of the project is intended to add an AI layer on top of the data platform.
+The project includes a review-based RAG application.
 
-The planned architecture is:
-
-                dbt STAGING
-                     |
-                     v
-              Review Data
-                     |
-                     v
-              LLM Enrichment
-                     |
-                     v
-             Enriched Reviews
-                     |
-          +----------+----------+
-          |                     |
-          v                     v
-        RAG                 Analytics
-          |                     |
-          v                     v
-     Vector Store          Text-to-SQL
-          |                     |
-          v                     v
-      RAG Chat             Snowflake
-
-The AI components will allow users to ask questions about Zomato reviews and
-business data using natural language.
-
----
-
-## 17. Planned RAG Pipeline
-
-The planned Retrieval-Augmented Generation pipeline will use Zomato review data.
-
-Expected flow:
-
-Reviews
-   |
-   v
-Text Processing
-   |
-   v
-Embeddings
-   |
-   v
-Vector Store
-   |
-   v
-Retriever
-   |
-   v
-LLM
-   |
-   v
+```text
+Zomato Reviews
+      |
+      v
+BGE-M3 Embeddings
+      |
+      v
+Vector Representations
+      |
+      v
+Cosine Similarity Search
+      |
+      v
+Top Relevant Reviews
+      |
+      v
+Groq LLM
+      |
+      v
 Natural Language Answer
+```
 
-The purpose is to allow users to ask questions based on restaurant review information.
+Implementation:
+
+```text
+ai/rag_chat.py
+```
+
+The application retrieves relevant customer reviews and supplies them as context to the LLM.
 
 ---
 
-## 18. Planned Text-to-SQL
+#  Text-to-SQL
 
-A future Text-to-SQL component will allow users to ask analytical questions in natural language.
+The project includes natural-language analytics.
 
 Example:
 
-"Which city generated the highest revenue?"
+```text
+Top 10 cities by GMV
+```
 
-The planned flow is:
+Workflow:
 
+```text
 Natural Language Question
-        |
-        v
-Text-to-SQL Model
-        |
-        v
-Generated SQL
-        |
-        v
-SELECT-only Validation
-        |
-        v
-Snowflake
-        |
-        v
-Result
-        |
-        v
-Natural Language Response
+          |
+          v
+       Groq LLM
+          |
+          v
+    Generated SQL
+          |
+          v
+     Safety Check
+          |
+          v
+      Snowflake
+          |
+          v
+      DataFrame
+          |
+          v
+    Streamlit Result
+```
 
-A SELECT-only safety mechanism is planned so that generated queries cannot modify or delete data.
+Implementation:
 
----
+```text
+ai/text_to_sql.py
+```
 
-## 19. Planned Streamlit Dashboard
-
-A Streamlit application is planned as the presentation layer.
-
-The dashboard will provide an interactive interface for exploring Zomato analytics.
-
-Potential areas include:
-
-- Revenue analysis
-- Restaurant performance
-- Delivery performance
-- Customer analysis
-- Food analysis
-- Review insights
-- Natural-language analytics
+The LLM receives the available analytical schema and generates a SQL query.
 
 ---
 
-## 20. How the Components Work Together
+#  SQL Safety
 
-The complete platform is designed around the following responsibilities:
+The Text-to-SQL application includes an application-level safety check.
 
-AWS S3
-- Stores raw source files.
+Queries must begin with:
 
-Snowflake
-- Stores raw and transformed warehouse data.
+```text
+SELECT
+```
 
-dbt
-- Transforms raw data.
-- Creates staging models.
-- Creates analytical marts.
-- Runs data quality tests.
+or:
 
-Airflow
-- Orchestrates the pipeline.
-- Controls task dependencies.
-- Automates pipeline execution.
+```text
+WITH
+```
 
-Python
-- Supports data processing and future AI components.
+It also checks for operations such as:
 
-Docker
-- Provides a reproducible Airflow environment.
+```text
+DROP
+DELETE
+TRUNCATE
+ALTER
+UPDATE
+INSERT
+CREATE
+REPLACE
+GRANT
+REVOKE
+```
 
-Streamlit
-- Planned user-facing analytics layer.
-
-AI
-- Planned enrichment, RAG, and Text-to-SQL layer.
-
----
-
-## 21. Key Learning Outcomes
-
-This project provides practical experience with:
-
-- Building an end-to-end data pipeline
-- Cloud data storage with AWS S3
-- Cloud data warehousing with Snowflake
-- S3 to Snowflake data ingestion
-- External stages and storage integrations
-- ELT architecture
-- Data transformation using dbt
-- Dimensional data modeling
-- Fact and dimension tables
-- Data quality testing
-- Workflow orchestration using Airflow
-- Docker-based development
-- SQL-based analytics
-- Git and GitHub version control
-- Designing AI-powered data applications
+> This is an application-level safeguard, not a complete security boundary. Database permissions should also restrict the execution role.
 
 ---
 
-## 22. Repository
+#  Streamlit Applications
 
-GitHub Repository:
+Current AI applications include:
+
+```text
+ai/rag_chat.py
+ai/text_to_sql.py
+```
+
+### RAG
+
+Example:
+
+```text
+What are the most common complaints about delivery?
+```
+
+### Text-to-SQL
+
+Example:
+
+```text
+Top 10 restaurants by revenue
+```
+
+---
+
+#  Project Structure
+
+```text
+zomato-data-engineering-platform/
+│
+├── README.md
+├── .gitignore
+│
+├── ai/
+│   ├── enrich_reviews.py
+│   ├── rag_chat.py
+│   └── text_to_sql.py
+│
+├── airflow/
+│   ├── Dockerfile
+│   ├── docker-compose.yaml
+│   └── dags/
+│       └── zomato_batch.py
+│
+├── review_embeddings.parquet
+│
+└── zomato/
+    ├── dbt_project.yml
+    ├── README.md
+    ├── analyses/
+    ├── macros/
+    │   └── generate_schema_name.sql
+    ├── models/
+    │   ├── staging/
+    │   └── marts/
+    ├── seeds/
+    ├── snapshots/
+    └── tests/
+```
+
+---
+
+# 🔑 Environment Variables
+
+Store credentials locally in `.env`.
+
+Example:
+
+```env
+SNOWFLAKE_ACCOUNT=your_account
+SNOWFLAKE_USER=your_user
+SNOWFLAKE_PASSWORD=your_password
+SNOWFLAKE_WAREHOUSE=your_warehouse
+SNOWFLAKE_DATABASE=your_database
+SNOWFLAKE_SCHEMA=your_schema
+
+GROQ_API_KEY=your_groq_api_key
+SAMPLE_N=5
+```
+
+Never commit real credentials or API keys.
+
+---
+
+# 🚀 Running the Project
+
+## 1. Clone
+
+```bash
+git clone https://github.com/charanreddy0006/zomato-data-engineering-platform.git
+cd zomato-data-engineering-platform
+```
+
+## 2. Configure credentials
+
+Create the required local `.env` configuration.
+
+## 3. Start Airflow
+
+```bash
+cd airflow
+docker-compose build
+docker-compose up -d
+```
+
+## 4. Open Airflow
+
+```text
+http://localhost:8080
+```
+
+## 5. Trigger the DAG
+
+Trigger:
+
+```text
+zomato_batch
+```
+
+Pipeline:
+
+```text
+reload_raw
+     ↓
+dbt_build_core
+     ↓
+enrich_reviews
+     ↓
+dbt_build_ai
+```
+
+---
+
+
+---
+
+#  Future Improvements
+
+- Store embeddings in a persistent vector database.
+- Add incremental AI enrichment for larger datasets.
+- Replace simple SQL keyword checks with stronger SQL parsing/validation.
+- Add automated data-quality monitoring.
+- Add Airflow failure notifications.
+- Add CI/CD for dbt and Python.
+- Deploy Streamlit to the cloud.
+- Improve configuration so the project is portable across machines.
+- Add automated documentation and testing.
+
+---
+
+#  Security
+
+Never commit:
+
+```text
+.env
+API keys
+Snowflake passwords
+AWS credentials
+Private keys
+profiles.yml
+Large raw datasets
+```
+
+The repository `.gitignore` excludes sensitive and generated files.
+
+For production environments, use a proper secrets-management solution.
+
+---
+
+#  Repository
+
+GitHub:
 
 https://github.com/charanreddy0006/zomato-data-engineering-platform
 
-The repository contains the source code and configuration required for the project.
-
-Raw datasets and sensitive configuration files are intentionally excluded from the repository.
-
 ---
 
+
+
+## ⭐ Project Summary
+
+This project combines modern **Data Engineering and AI Engineering** into one end-to-end platform:
+
+```text
+Amazon S3
+    ↓
+Snowflake
+    ↓
+dbt
+    ↓
+Apache Airflow
+    ↓
+Groq AI
+    ↓
+BGE-M3
+    ↓
+RAG
+    ↓
+Text-to-SQL
+    ↓
+Streamlit
+```
+
+A practical portfolio project demonstrating how cloud data pipelines, analytical data modeling, orchestration, and AI-powered applications can work together.
