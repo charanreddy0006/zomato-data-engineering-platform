@@ -1,4 +1,4 @@
-# 🍽️ Zomato Data Engineering & AI Analytics Platform
+#  Zomato Data Engineering & AI Analytics Platform
 
 An end-to-end **Data Engineering + AI Analytics** platform built around Zomato datasets.
 
